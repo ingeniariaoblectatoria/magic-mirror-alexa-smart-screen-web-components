@@ -25,6 +25,8 @@
   "devDependencies": {
     "@alexa-smart-screen/common": "^1.0.0",
     "@alexa-smart-screen/window-manager": "^1.0.0",
+    "alexa-smart-screen-web-components": "file:",
+    "apl-client": "/home/ingeniariaoblectatoria/sdk-folder/src/apl-client-library/apl-client-js",
     "standardized-audio-context-mock": "^8.4.16"
   }
 }

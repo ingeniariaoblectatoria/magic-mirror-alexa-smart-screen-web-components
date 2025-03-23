@@ -295,6 +295,9 @@ IVisualCharacteristicsObserver, IWindowManagerObserver {
   }
 
   public onAlexaStateChanged(alexaState : AlexaState) : void {
+    if ((this.alexaState === AlexaState.SPEAKING && alexaState === AlexaState.IDLE)){
+	window.location.href = "http://localhost:8080"
+    }
     if ((alexaState === AlexaState.CONNECTED || alexaState === AlexaState.IDLE)) {
       // If Alexa has connected then we must be connected and authorized
       this.clientConnection = ClientConnection.CONNECTED;
