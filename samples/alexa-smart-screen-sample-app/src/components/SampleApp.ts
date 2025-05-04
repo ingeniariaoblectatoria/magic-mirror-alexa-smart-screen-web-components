@@ -46,6 +46,7 @@ import {
   DisplayMode,
   AVSVisualInterfaces
 } from '@alexa-smart-screen/common';
+import { RecognizeSpeechCaptureState } from '@alexa-smart-screen/app-utils';
 import {
   APLEvent,
   APLHandler,
@@ -158,6 +159,7 @@ IVisualCharacteristicsObserver, IWindowManagerObserver {
   private alexaState : AlexaState;
   private authorizationState : AuthorizationState;
   private authorizationRequest : ICBLAuthorizationRequest;
+  private listenedOnce: boolean;
 
   constructor() {
     super();
@@ -239,6 +241,7 @@ IVisualCharacteristicsObserver, IWindowManagerObserver {
     this.sessionSetupHandler.getObserverManager().addObserver(this);
     this.windowManagerHandler.getObserverManager().addObserver(this);
     this.windowManagerHandler.getObserverManager().addObserver(this.attentionSystemRenderer);
+    this.listenedOnce = false;
   
     // Init Orientation
     this.displayOrientation = this.getDisplayOrientation();
@@ -297,7 +300,7 @@ IVisualCharacteristicsObserver, IWindowManagerObserver {
 
   public onAlexaStateChanged(alexaState : AlexaState) : void {
     if ((this.alexaState === AlexaState.SPEAKING && alexaState === AlexaState.IDLE)){
-	window.location.href = "http://localhost:8080"
+	  window.location.href = "http://localhost:8080"
     }
     if ((alexaState === AlexaState.CONNECTED || alexaState === AlexaState.IDLE)) {
       // If Alexa has connected then we must be connected and authorized
@@ -315,8 +318,19 @@ IVisualCharacteristicsObserver, IWindowManagerObserver {
     if (alexaState === AlexaState.CONNECTING) {
       this.clientConnection = ClientConnection.CONNECTING;
     }
+    let priorAlexaState = this.alexaState;
     this.alexaState = alexaState;
     this.updateHomeScreen();
+    if (!this.listenedOnce) {
+      if (
+          (priorAlexaState !== AlexaState.CONNECTED && priorAlexaState !== AlexaState.IDLE)
+          && (alexaState === AlexaState.CONNECTED || alexaState === AlexaState.IDLE)
+      ) {
+        this.listenedOnce = true;
+        console.log("request for listening");
+        this.interactionManagerEvent.recognizeSpeechRequestEvent(AudioInputInitiator.TAP, RecognizeSpeechCaptureState.START);
+      }
+    }
   }
 
   public onVisualCharacteristicsInit(visualCharacteristics : ISetVisualCharacteristicsDirectivePayload) : void {
@@ -702,3 +716,4 @@ IVisualCharacteristicsObserver, IWindowManagerObserver {
 }
 
 window.customElements.define('sample-app', SampleApp);
+
